@@ -9,7 +9,7 @@ cv::Mat inputImage;
 cv::Mat outputImage;
 
 std::string inputFile = "G:\\sampleImages\\bmp3.bmp";
-std::string outputFile;
+std::string outputFile = "bmp3.txt";
 
 //get number of rows and columns of input image
 unsigned int numRows(){ return inputImage.rows; }
@@ -41,8 +41,11 @@ int main(){
 	//Call kernel to calculate DCT values for Y, Cb, Cr channels.
 	FDCTHelper(d_Y, d_Cb, d_Cr, &d_DCTY, &d_DCTCbCr, &h_DCTY, &h_DCTCbCr, numRows(), numCols());
 
+	//Open output file
+	FILE *outputFIle = fopen("bmp3.txt","wb");
 	//Entropy encoding of DCT values.
-	
+	compressImage(h_DCTY, h_DCTCbCr, outputFile, numRows(), numCols());
+
 	system("pause");
 	cudaFree(d_DCTY);
 	cudaFree(d_DCTCbCr);
