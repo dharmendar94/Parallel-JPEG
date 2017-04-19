@@ -9,7 +9,6 @@ cv::Mat inputImage;
 cv::Mat outputImage;
 
 std::string inputFile = "G:\\sampleImages\\bmp3.bmp";
-std::string outputFile = "bmp3.txt";
 
 //get number of rows and columns of input image
 unsigned int numRows(){ return inputImage.rows; }
@@ -42,7 +41,11 @@ int main(){
 	FDCTHelper(d_Y, d_Cb, d_Cr, &d_DCTY, &d_DCTCbCr, &h_DCTY, &h_DCTCbCr, numRows(), numCols());
 
 	//Open output file
-	FILE *outputFIle = fopen("bmp3.txt","wb");
+	FILE *outputFile = fopen("bmp3.txt","wb");
+	if (outputFile == NULL){
+		printf("Error : Cannot open output file.\n");
+		return 0;
+	}
 	//Entropy encoding of DCT values.
 	compressImage(h_DCTY, h_DCTCbCr, outputFile, numRows(), numCols());
 

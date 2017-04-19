@@ -32,11 +32,12 @@ inline int returnSize(int val){
 }
 
 
-void encode(int RL[][2], int len, int id){
+void encode(int RL[][2], int len, FILE *outputFile, int id){
 	int size;
 	char code[32];
 	size = returnSize(RL[0][1]);
-	for ()
+	
+
 	for (int i = 0; i < len; i++){
 		size = returnSize(RL[i][1]);
 
@@ -101,7 +102,7 @@ int runLengthEncode(int *zz, int RL[][2]){
 }
 
 
-int compress(int dct[8][8], int dcVal,int id){
+int compress(int dct[8][8], int dcVal, FILE *outputFile,int id){
 	
 	int rlen=0, RL[64][2];
 	
@@ -116,13 +117,13 @@ int compress(int dct[8][8], int dcVal,int id){
 
 	rlen = runLengthEncode(ZZ, RL);
 
-	encode(RL,rlen,id);
+	encode(RL, rlen, outputFile, id);
 
 	return newDC;
 }
 
 
-void compressImage(int *DCTY, int2 *DCTCbCr, unsigned int numRows, unsigned int numCols){
+void compressImage(int *DCTY, int2 *DCTCbCr, FILE* outputFile, unsigned int numRows, unsigned int numCols){
 
 	unsigned int CbCr_numRows = (numRows % 2 == 0) ? (numRows / 2) : (numRows / 2 + 1);
 	unsigned int CbCr_numCols = (numCols % 2 == 0) ? (numCols / 2) : (numCols / 2 + 1);
@@ -170,8 +171,8 @@ void compressImage(int *DCTY, int2 *DCTCbCr, unsigned int numRows, unsigned int 
 				}
 			}
 
-			YDC = compress(dct1, YDC, 0);
-			YDC = compress(dct2, YDC, 0);
+			YDC = compress(dct1, YDC, outputFile, 0);
+			YDC = compress(dct2, YDC, outputFile, 0);
 
 			//encode Cb,Cr
 			for (int r = 0; r < 8; r++){
@@ -187,8 +188,8 @@ void compressImage(int *DCTY, int2 *DCTCbCr, unsigned int numRows, unsigned int 
 				}
 			}
 
-			CbDC = compress(dct1, CbDC, 1);
-			CrDC = compress(dct2, CrDC, 1);
+			CbDC = compress(dct1, CbDC, outputFile, 1);
+			CrDC = compress(dct2, CrDC, outputFile, 1);
 		}
 	}
 
