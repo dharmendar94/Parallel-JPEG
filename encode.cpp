@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<math.h>
+#include<string.h>
 #include<cuda_runtime.h>
 #include"huffmanTables.h"
 
@@ -32,16 +33,78 @@ inline int returnSize(int val){
 }
 
 
-void encode(int RL[][2], int len, FILE *outputFile, int id){
-	int size;
+void toBinary(int value, char *code, int size, int tlen){
+	
+	if (value < 0){
+		int absVal = abs(value);
+		
+		for (int i = tlen - 1; i > tlen - size - 1; i--){
+			if (absVal % 2 == 0)
+				code[i] = '1';
+			else
+				code[i] = '0';
+			absVal /= 2;
+		}
+	}
+	else{
+		
+		for (int i = tlen - 1; i > tlen - size - 1; i--){
+			if (value % 2 == 0)
+				code[i] = '0';
+			else
+				code[i] = '1';
+		}
+	}
+	code[tlen] = '\0';
+	return;
+}
+void encodeBlock(int RL[][2], int rlelen, FILE *outputFile, int id){
+	int size, tlen;
 	char code[32];
 	size = returnSize(RL[0][1]);
 	
+	if (id){
+		//Huffman encode CbCr DC size 
+		tlen = lengthDC_chroma[size];
+		strcpy(code, HuffmanDC_chroma[size]);
+		toBinary(RL[0][1], code, size, tlen);
 
-	for (int i = 0; i < len; i++){
-		size = returnSize(RL[i][1]);
+		//write encoded information to file.
+		fwrite(code, sizeof(char), tlen, outputFile);
 
+		//Huffman encode Y AC size values, AC values to binary.
+		for (int i = 0; i < rlelen; i++){
+			size = returnSize(RL[i][1]);
+
+			tlen = lengthAC_chroma[RL[i][0]][size];
+			strcpy(code, HuffmanAC_chroma[tlen][size]);
+
+			toBinary(RL[i][1], code, size, tlen);
+			fwrite(code, sizeof(char), tlen, outputFile);
+		}
 	}
+	else{
+		//Huffman encode Y DC size value
+		strcpy(code,HuffmanDC_luma[size]);
+		tlen = lengthDC_luma[size];
+		toBinary(RL[0][1], code, size, tlen);
+		
+		//write encoded information to file.
+		fwrite(code, sizeof(char), tlen, outputFile);
+		
+		//Huffman encode Y AC size values, AC values to binary.
+		for (int i = 0; i < rlelen; i++){
+			size = returnSize(RL[i][1]);
+
+			tlen = lengthAC_luma[RL[i][0]][size];
+			strcpy(code, HuffmanAC_luma[tlen][size]);
+
+			toBinary(RL[i][1], code, size, tlen);
+			fwrite(code, sizeof(char), tlen, outputFile);
+
+		}
+	}
+	
 }
 
 int dct1[8][8];
@@ -117,7 +180,7 @@ int compress(int dct[8][8], int dcVal, FILE *outputFile,int id){
 
 	rlen = runLengthEncode(ZZ, RL);
 
-	encode(RL, rlen, outputFile, id);
+	encodeBlock(RL, rlen, outputFile, id);
 
 	return newDC;
 }
