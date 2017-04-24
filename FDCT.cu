@@ -144,9 +144,12 @@ void FDCTHelper(int *d_Y, int *d_Cb, int *d_Cr, int **d_DCTY, int2 **d_DCTCbCr, 
 	//***********************************************************************************************//
 
 
-	//Allocate memory for FDCT values for Y channel.
+	//Allocate memory for FDCT values for Y channel in device.
 	err = cudaMalloc((void**)d_DCTY, Y_numRows * Y_numCols * sizeof(int));
 	checkErrors(err, "cudaMalloc(d_DCTY)");
+
+	//Allocate memory for FDCT values for Y channel in host.
+	*h_DCTY = (int*)malloc(Y_numRows * Y_numCols * sizeof(int));
 
 	const dim3 Y_blockSize(8, 8, 1);
 	const dim3 Y_gridSize(Y_numCols / 8 + 1, Y_numRows / 8 + 1, 1);
@@ -159,10 +162,17 @@ void FDCTHelper(int *d_Y, int *d_Cb, int *d_Cr, int **d_DCTY, int2 **d_DCTCbCr, 
 	err = cudaGetLastError();
 	checkErrors(err, "YChannelFDCT_2D<<< , >>>");
 
+	//Copy DCT values from device to host.
+	err = cudaMemcpy(*h_DCTY, *d_DCTY, Y_numRows * Y_numCols * sizeof(int),cudaMemcpyDeviceToHost);
+	checkErrors(err, "cudaMemcpy(*h_DCTY, *d_DCTY)");
+
 	//Free Y channel memory in device.
 	err = cudaFree(d_Y);
 	checkErrors(err, "cudaFree(d_Y)");
 
+	//Free Y DCT values from device.
+	err = cudaFree(*d_DCTY);
+	checkErrors(err, "cudaFree(d_DCTY)");
 
 	//***********************************************************************************************//
 	///////////****************** Cb, Cr channel section ****************************//////////////////
@@ -171,9 +181,12 @@ void FDCTHelper(int *d_Y, int *d_Cb, int *d_Cr, int **d_DCTY, int2 **d_DCTCbCr, 
 	unsigned int CbCr_numRows = (Y_numRows % 2 == 0) ? (Y_numRows / 2) : (Y_numRows / 2 + 1);
 	unsigned int CbCr_numCols = (Y_numCols % 2 == 0) ? (Y_numCols / 2) : (Y_numCols / 2 + 1);
 
-	//Allocate memory for FDCT values of Cb and Cr channels.
+	//Allocate memory for FDCT values of Cb and Cr channels in device.
 	err = cudaMalloc((void**)d_DCTCbCr, CbCr_numRows * CbCr_numCols * sizeof(int2));
 	checkErrors(err, "cudaMalloc(d_DCTCbCr)");
+
+	//Allocate memory for FDCT values of Cb and Cr channels in host.
+	*h_DCTCbCr = (int2*)malloc(CbCr_numRows * CbCr_numCols * sizeof(int2));
 
 	const dim3 CbCr_blockSize(8,8,1);
 	const dim3 CbCr_gridSize(CbCr_numCols / 8 + 1, CbCr_numRows / 8 + 1);
@@ -186,10 +199,18 @@ void FDCTHelper(int *d_Y, int *d_Cb, int *d_Cr, int **d_DCTY, int2 **d_DCTCbCr, 
 	err = cudaGetLastError();
 	checkErrors(err, "CbCrChannelFDCT_2D<<< , >>>");
 
+	//Copy DCT values from device to host.
+	err = cudaMemcpy(*h_DCTCbCr, *d_DCTCbCr, CbCr_numRows * CbCr_numCols * sizeof(int2), cudaMemcpyDeviceToHost);
+	checkErrors(err, "cudaMemcpy(*h_DCTCbCr, *d_DCTCbCr)");
+
 	//Free Cb and Cr channels memory in device
 	err = cudaFree(d_Cb);
 	checkErrors(err, "cudaFree(d_Cb)");
 
 	err = cudaFree(d_Cr);
 	checkErrors(err, "cudaFree(d_Cr)");
+
+	//Free Cb, Cr DCT values from device
+	err = cudaFree(*d_DCTCbCr);
+	checkErrors(err, "cudaFree(d_DCTCbCr)");
 }

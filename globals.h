@@ -31,7 +31,7 @@ void RGBToYCbCrHelper(uchar3 *d_inputImage, int** d_Y, int** d_Cb, int** d_Cr, u
 void FDCTHelper(int *d_Y, int *d_Cb, int *d_Cr, int **d_DCTY, int2 **d_DCTCbCr, int**h_DCTY, int2 **h_DCTCbCr,
 	unsigned int Y_numRows, unsigned int Y_numCols);
 
-void compressImage(int *DCTY, int2 *DCTCbCr, FILE* outputFile, unsigned int numRows, unsigned int numCols);
+void compressImage(int *DCTY, int2 *DCTCbCr, FILE** outputFile, unsigned int numRows, unsigned int numCols);
 
 //handle errors
 extern void checkErrors(cudaError_t err, char* string);

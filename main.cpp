@@ -41,13 +41,13 @@ int main(){
 	FDCTHelper(d_Y, d_Cb, d_Cr, &d_DCTY, &d_DCTCbCr, &h_DCTY, &h_DCTCbCr, numRows(), numCols());
 
 	//Open output file
-	FILE *outputFile = fopen("bmp3.txt","wb");
+	FILE *outputFile = fopen("bmp4.bin","wb");
 	if (outputFile == NULL){
 		printf("Error : Cannot open output file.\n");
 		return 0;
 	}
 	//Entropy encoding of DCT values.
-	compressImage(h_DCTY, h_DCTCbCr, outputFile, numRows(), numCols());
+	compressImage(h_DCTY, h_DCTCbCr, &outputFile, numRows(), numCols());
 
 	system("pause");
 	cudaFree(d_DCTY);

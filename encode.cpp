@@ -53,12 +53,13 @@ void toBinary(int value, char *code, int size, int tlen){
 				code[i] = '0';
 			else
 				code[i] = '1';
+			value /= 2;
 		}
 	}
 	code[tlen] = '\0';
 	return;
 }
-void encodeBlock(int RL[][2], int rlelen, FILE *outputFile, int id){
+void encodeBlock(int RL[][2], int rlelen, FILE **outputFile, int id){
 	int size, tlen;
 	char code[32];
 	size = returnSize(RL[0][1]);
@@ -70,17 +71,17 @@ void encodeBlock(int RL[][2], int rlelen, FILE *outputFile, int id){
 		toBinary(RL[0][1], code, size, tlen);
 
 		//write encoded information to file.
-		fwrite(code, sizeof(char), tlen, outputFile);
+		fwrite(code, sizeof(char), tlen, *outputFile);
 
-		//Huffman encode Y AC size values, AC values to binary.
+		//Huffman encode Cb, Cr AC size values, AC values to binary.
 		for (int i = 0; i < rlelen; i++){
 			size = returnSize(RL[i][1]);
 
 			tlen = lengthAC_chroma[RL[i][0]][size];
-			strcpy(code, HuffmanAC_chroma[tlen][size]);
+			strcpy(code, HuffmanAC_chroma[RL[i][0]][size]);
 
 			toBinary(RL[i][1], code, size, tlen);
-			fwrite(code, sizeof(char), tlen, outputFile);
+			fwrite(code, sizeof(char), tlen, *outputFile);
 		}
 	}
 	else{
@@ -90,17 +91,17 @@ void encodeBlock(int RL[][2], int rlelen, FILE *outputFile, int id){
 		toBinary(RL[0][1], code, size, tlen);
 		
 		//write encoded information to file.
-		fwrite(code, sizeof(char), tlen, outputFile);
+		fwrite(code, sizeof(char), tlen, *outputFile);
 		
 		//Huffman encode Y AC size values, AC values to binary.
 		for (int i = 0; i < rlelen; i++){
 			size = returnSize(RL[i][1]);
 
 			tlen = lengthAC_luma[RL[i][0]][size];
-			strcpy(code, HuffmanAC_luma[tlen][size]);
+			strcpy(code, HuffmanAC_luma[RL[i][0]][size]);
 
 			toBinary(RL[i][1], code, size, tlen);
-			fwrite(code, sizeof(char), tlen, outputFile);
+			fwrite(code, sizeof(char), tlen, *outputFile);
 
 		}
 	}
@@ -111,7 +112,7 @@ int dct1[8][8];
 int dct2[8][8];
 
 int runLengthEncode(int *zz, int RL[][2]){
-	int i, j, eob, count;
+	int i, j, count;
 	int rlen = 0;
 	i = 63;
 	if (zz[63] == 0){
@@ -165,7 +166,7 @@ int runLengthEncode(int *zz, int RL[][2]){
 }
 
 
-int compress(int dct[8][8], int dcVal, FILE *outputFile,int id){
+int compress(int dct[8][8], int dcVal, FILE **outputFile,int id){
 	
 	int rlen=0, RL[64][2];
 	
@@ -186,7 +187,7 @@ int compress(int dct[8][8], int dcVal, FILE *outputFile,int id){
 }
 
 
-void compressImage(int *DCTY, int2 *DCTCbCr, FILE* outputFile, unsigned int numRows, unsigned int numCols){
+void compressImage(int *DCTY, int2 *DCTCbCr, FILE** outputFile, unsigned int numRows, unsigned int numCols){
 
 	unsigned int CbCr_numRows = (numRows % 2 == 0) ? (numRows / 2) : (numRows / 2 + 1);
 	unsigned int CbCr_numCols = (numCols % 2 == 0) ? (numCols / 2) : (numCols / 2 + 1);
@@ -217,8 +218,8 @@ void compressImage(int *DCTY, int2 *DCTCbCr, FILE* outputFile, unsigned int numR
 					}
 				}
 			}
-			YDC = compress(dct1,YDC,0);
-			YDC = compress(dct2, YDC,0);
+			YDC = compress(dct1, YDC, outputFile,0);
+			YDC = compress(dct2, YDC, outputFile,0);
 			 
 			for (int r = 0; r < 8; r++){
 				for (int c = 0; c < 8; c++){
@@ -227,8 +228,8 @@ void compressImage(int *DCTY, int2 *DCTCbCr, FILE* outputFile, unsigned int numR
 						dct2[r][c] = 0;
 					}
 					else{
-						dct1[r][c] = DCTY[((bx + 1) * 8 + c) + (by * 8 + r)*numCols];
-						dct2[r][c] = DCTY[(bx * 8 + c) + (by * 8 + r)*numCols];
+						dct1[r][c] = DCTY[(bx * 8 + c) + ((by+1) * 8 + r)*numCols];
+						dct2[r][c] = DCTY[((bx+1) * 8 + c) + ((by+1) * 8 + r)*numCols];
 						
 					}
 				}
