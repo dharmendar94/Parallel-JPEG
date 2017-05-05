@@ -71,41 +71,40 @@ void encodeBlock(int RL[][2], int rlelen, FILE **outputFile, int id){
 		toBinary(RL[0][1], code, size, tlen);
 
 		//write encoded information to file.
-		fwrite(code, sizeof(char), tlen, *outputFile);
+		fwrite(code, 1, tlen, *outputFile);
 
 		//Huffman encode Cb, Cr AC size values, AC values to binary.
-		for (int i = 0; i < rlelen; i++){
+		for (int i = 1; i < rlelen; i++){
 			size = returnSize(RL[i][1]);
 
 			tlen = lengthAC_chroma[RL[i][0]][size];
 			strcpy(code, HuffmanAC_chroma[RL[i][0]][size]);
 
 			toBinary(RL[i][1], code, size, tlen);
-			fwrite(code, sizeof(char), tlen, *outputFile);
+			fwrite(code, 1, tlen, *outputFile);
 		}
 	}
 	else{
-		//Huffman encode Y DC size value
+	//Huffman encode Y DC size value
 		strcpy(code,HuffmanDC_luma[size]);
 		tlen = lengthDC_luma[size];
 		toBinary(RL[0][1], code, size, tlen);
 		
-		//write encoded information to file.
-		fwrite(code, sizeof(char), tlen, *outputFile);
+	//write encoded information to file.
+		fwrite(code, 1, tlen, *outputFile);
 		
 		//Huffman encode Y AC size values, AC values to binary.
-		for (int i = 0; i < rlelen; i++){
+		for (int i = 1; i < rlelen; i++){
 			size = returnSize(RL[i][1]);
 
 			tlen = lengthAC_luma[RL[i][0]][size];
 			strcpy(code, HuffmanAC_luma[RL[i][0]][size]);
 
 			toBinary(RL[i][1], code, size, tlen);
-			fwrite(code, sizeof(char), tlen, *outputFile);
+			fwrite(code, 1, tlen, *outputFile);
 
 		}
 	}
-	
 }
 
 int dct1[8][8];
@@ -166,7 +165,7 @@ int runLengthEncode(int *zz, int RL[][2]){
 }
 
 
-int compress(int dct[8][8], int dcVal, FILE **outputFile,int id){
+int compress(int dct[][8], int dcVal, FILE **outputFile,int id){
 	
 	int rlen=0, RL[64][2];
 	
@@ -175,7 +174,7 @@ int compress(int dct[8][8], int dcVal, FILE **outputFile,int id){
 
 	//Zig Zag
 	int ZZ[64];
-	for (int i = 0, k = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 8; j++)
 			ZZ[z[i][j]] = dct[i][j];
 
