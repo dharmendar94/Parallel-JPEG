@@ -112,17 +112,19 @@ int dct2[8][8];
 
 int runLengthEncode(int *zz, int RL[][2]){
 	int i, j, count;
-	int rlen = 0;
+	int rlen = 1;
 	i = 63;
+	RL[0][0] = 0;
+	RL[0][1] = zz[0];
 	if (zz[63] == 0){
-		while (i >= 0 && zz[i] == 0)i--;
-		if (i < 0){
+		while (i >= 1 && zz[i] == 0)i--;
+		if (i == 0){
 			RL[rlen][0] = 0;
 			RL[rlen++][1] = 0;
 		}
 		else{
 			count = 0;
-			for (j = 0; j <= i; j++){
+			for (j = 1; j <= i; j++){
 				if (zz[j] == 0){
 					++count;
 				}
@@ -144,7 +146,7 @@ int runLengthEncode(int *zz, int RL[][2]){
 	}
 	else{
 		count = 0;
-		for (j = 0; j <= i; j++){
+		for (j = 1; j <= i; j++){
 			if (zz[j] == 0){
 				++count;
 			}
@@ -165,7 +167,7 @@ int runLengthEncode(int *zz, int RL[][2]){
 }
 
 
-int compress(int dct[][8], int dcVal, FILE **outputFile,int id){
+int compress(int dct[8][8], int dcVal, FILE **outputFile,int id){
 	
 	int rlen=0, RL[64][2];
 	
@@ -194,28 +196,24 @@ void compressImage(int *DCTY, int2 *DCTCbCr, FILE** outputFile, unsigned int num
 	int YDC = 0;
 	int CbDC = 0;
 	int CrDC = 0;
-	int Yblocks_y = (numRows + 7) / 8;
-	int Yblocks_x = (numCols + 7) / 8;
-	int Crblocks_y = (CbCr_numRows + 7) / 8;
-	int Crblocks_x = (CbCr_numCols + 7) / 8;
-
-	YDC = CbDC = CrDC = 0;
-	for (int by = 0; by < Yblocks_y; by+=2){
-		
+	int Yblocks_y = (numRows % 2 == 0) ? (numRows / 8) : (numRows / 8 + 1);
+	int Yblocks_x = (numCols%2==0)?(numCols / 8):(numCols/8+1);
+	
+	for (int by = 0; by < Yblocks_y; by+=2){	
 		for (int bx = 0; bx < Yblocks_x; bx+=2){
 			
 			//encode Y
 			for (int r = 0; r < 8; r++){
 				for (int c = 0; c < 8; c++){
-					if ((by * 8 + r) >= numRows || (bx * 8 + c) >= numCols){
+					if ((by * 8 + r) >= numRows || (bx * 8 + c) >= numCols)
 						dct1[r][c] = 0;
-						dct2[r][c] = 0;
-					}
-					else{
+					else
 						dct1[r][c] = DCTY[(bx * 8 + c) + (by * 8 + r)*numCols];
+				
+					if ((by * 8 + r) >= numRows || ((bx+1) * 8 + c) >= numCols)
+						dct2[r][c] = 0;
+					else
 						dct2[r][c] = DCTY[((bx + 1) * 8 + c) + (by * 8 + r)*numCols];
-
-					}
 				}
 			}
 			YDC = compress(dct1, YDC, outputFile,0);
@@ -223,21 +221,23 @@ void compressImage(int *DCTY, int2 *DCTCbCr, FILE** outputFile, unsigned int num
 			 
 			for (int r = 0; r < 8; r++){
 				for (int c = 0; c < 8; c++){
-					if ((by * 8 + r) >= numRows || (bx * 8 + c )>= numCols){
+					if ((by * 8 + r) >= numRows || (bx * 8 + c )>= numCols)
 						dct1[r][c] = 0;
-						dct2[r][c] = 0;
-					}
-					else{
+					else
 						dct1[r][c] = DCTY[(bx * 8 + c) + ((by+1) * 8 + r)*numCols];
-						dct2[r][c] = DCTY[((bx+1) * 8 + c) + ((by+1) * 8 + r)*numCols];
 						
-					}
+					if (((by+1) * 8 + r) >= numRows || ((bx+1) * 8 + c) >= numCols)
+						dct2[r][c] = 0;
+					else
+						dct2[r][c] = DCTY[((bx + 1) * 8 + c) + ((by + 1) * 8 + r)*numCols];
 				}
 			}
 
 			YDC = compress(dct1, YDC, outputFile, 0);
+			
 			YDC = compress(dct2, YDC, outputFile, 0);
 
+			
 			//encode Cb,Cr
 			for (int r = 0; r < 8; r++){
 				for (int c = 0; c < 8; c++){
