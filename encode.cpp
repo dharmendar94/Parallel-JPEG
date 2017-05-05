@@ -241,13 +241,13 @@ void compressImage(int *DCTY, int2 *DCTCbCr, FILE** outputFile, unsigned int num
 			//encode Cb,Cr
 			for (int r = 0; r < 8; r++){
 				for (int c = 0; c < 8; c++){
-					if ((by * 8 + r) >= numRows/2 || (bx * 8 + c) >= numCols/2){
+					if (((by/2) * 8 + r) >= CbCr_numRows || ((bx/2) * 8 + c) >= CbCr_numCols){
 						dct1[r][c] = 0;
 						dct2[r][c] = 0;
 					}
 					else{
-						dct1[r][c] = DCTCbCr[((bx/2) * 8 + c) + ((by/2) * 8 + r)*numCols].x;
-						dct2[r][c] = DCTCbCr[((bx/2) * 8 + c) + ((by/2) * 8 + r)*numCols].y;
+						dct1[r][c] = DCTCbCr[((bx/2) * 8 + c) + ((by/2) * 8 + r)*CbCr_numCols].x;
+						dct2[r][c] = DCTCbCr[((bx/2) * 8 + c) + ((by/2) * 8 + r)*CbCr_numCols].y;
 					}
 				}
 			}
