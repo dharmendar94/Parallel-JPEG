@@ -8,13 +8,23 @@
 cv::Mat inputImage;
 cv::Mat outputImage;
 
-std::string inputFile = "G:\\sampleImages\\bmp3.bmp";
+std::string inputFile;
+std::string outputFile;
 
 //get number of rows and columns of input image
 unsigned int numRows(){ return inputImage.rows; }
 unsigned int numCols(){ return inputImage.cols; }
 
-int main(){
+int main(int argc, char **argv){
+
+	if (argc != 3){
+		printf("Usage: JPEG_Encoder inputImagePath outImagePath\n");
+		system("pause");
+		exit(-1);
+	}
+	inputFile = argv[1];
+	outputFile = argv[2];
+
 	//freopen("Y_DCT.txt","w",stdout);
 	
 	checkErrors(cudaFree(0),"cudaFree(0)");
@@ -40,17 +50,18 @@ int main(){
 	//Call kernel to calculate DCT values for Y, Cb, Cr channels.
 	FDCTHelper(d_Y, d_Cb, d_Cr, &d_DCTY, &d_DCTCbCr, &h_DCTY, &h_DCTCbCr, numRows(), numCols());
 
+	std::string temp = "inter.txt";
 	//Open output file
-	FILE *outputFile = fopen("bmp4.txt","wb");
-	if (outputFile == NULL){
+	FILE *interFile = fopen(temp.c_str(),"wb");
+	if (interFile == NULL){
 		printf("Error : Cannot open output file.\n");
 		return 0;
 	}
 	//Entropy encoding of DCT values.
-	compressImage(h_DCTY, h_DCTCbCr, &outputFile, numRows(), numCols());
+	compressImage(h_DCTY, h_DCTCbCr, &interFile, numRows(), numCols());
 
 	//packing in 8 bits
-	//postProcess(&output);
+	postProcess(temp.c_str(),outputFile.c_str());
 	system("pause");
 	cudaFree(d_DCTY);
 	cudaFree(d_DCTCbCr);
