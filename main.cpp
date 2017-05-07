@@ -63,6 +63,8 @@ int main(int argc, char **argv){
 	//packing in 8 bits
 	postProcess(temp.c_str(),outputFile.c_str());
 	system("pause");
+	free(h_DCTY);
+	free(h_DCTCbCr);
 	cudaFree(d_DCTY);
 	cudaFree(d_DCTCbCr);
 	return 0;
