@@ -7,8 +7,8 @@
 
 cv::Mat inputImage;
 cv::Mat outputImage;
-std::string inputFile = "G:\\sampleImages\\bmp9.bmp";
-std::string outputFile = "output.jpeg";
+std::string inputFile = "G:\\sampleImages\\bmp2.bmp";
+std::string outputFile = "C:\\Users\\Dharmendar\\Documents\\Visual Studio 2013\\Projects\\JPEG_Encoder\\output.jpeg";
 
 //get number of rows and columns of input image
 unsigned int numRows(){ return inputImage.rows; }

@@ -39,14 +39,14 @@ int postProcess(std::string inter, std::string outputFIle, unsigned int numRows,
 {
 	FILE *fin = fopen(inter.c_str(),"rb");
 	if (fin == NULL){
-		printf("Cannot open comp.bin");
+		printf("Cannot open %s\n",inter.c_str());
 		system("pause");
 		exit(-1);
 	}
 
 	FILE *fout = fopen(outputFIle.c_str(), "wb");
 	if (fout == NULL){
-		printf("Cannot open comp.bin");
+		printf("Cannot open %s\n",outputFIle.c_str());
 		system("pause");
 		exit(-1);
 	}
