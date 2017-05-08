@@ -14,9 +14,16 @@ std::string outputFile = "C:\\Users\\Dharmendar\\Documents\\Visual Studio 2013\\
 unsigned int numRows(){ return inputImage.rows; }
 unsigned int numCols(){ return inputImage.cols; }
 
-int main(){
+int main(int argc, char **argv){
 
-	//freopen("Y_DCT.txt","w",stdout);
+	if (argc != 3){
+		printf("Usage: JPEG_Encoder inputfile outputfile\n");
+		system("pause");
+		return 0;
+	}
+
+	inputFile = argv[1];
+	outputFile = argv[2];
 	
 	checkErrors(cudaFree(0),"cudaFree(0)");
 	//StartCounter();
