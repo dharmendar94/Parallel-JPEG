@@ -221,7 +221,7 @@ void compressImage(int *DCTY, int2 *DCTCbCr, FILE** outputFile, unsigned int num
 			 
 			for (int r = 0; r < 8; r++){
 				for (int c = 0; c < 8; c++){
-					if ((by * 8 + r) >= numRows || (bx * 8 + c )>= numCols)
+					if (((by+1) * 8 + r) >= numRows || (bx * 8 + c )>= numCols)
 						dct1[r][c] = 0;
 					else
 						dct1[r][c] = DCTY[(bx * 8 + c) + ((by+1) * 8 + r)*numCols];

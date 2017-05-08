@@ -24,7 +24,7 @@ extern char returnSize(int);
 
 //////functions
 void preProcess(uchar3 **h_inputImage, uchar3 **d_inputImage, unsigned int numRows, unsigned int numCols);
-int postProcess(std::string inter, std::string outputFIle);
+int postProcess(std::string inter, std::string outputFIle, unsigned int numRows, unsigned int numCols);
 
 void RGBToYCbCrHelper(uchar3 *d_inputImage, int** d_Y, int** d_Cb, int** d_Cr, unsigned int numRows, unsigned int numCols);
 

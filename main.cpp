@@ -7,23 +7,14 @@
 
 cv::Mat inputImage;
 cv::Mat outputImage;
-
-std::string inputFile;
-std::string outputFile;
+std::string inputFile = "G:\\sampleImages\\bmp9.bmp";
+std::string outputFile = "output.jpeg";
 
 //get number of rows and columns of input image
 unsigned int numRows(){ return inputImage.rows; }
 unsigned int numCols(){ return inputImage.cols; }
 
-int main(int argc, char **argv){
-
-	if (argc != 3){
-		printf("Usage: JPEG_Encoder inputImagePath outImagePath\n");
-		system("pause");
-		exit(-1);
-	}
-	inputFile = argv[1];
-	outputFile = argv[2];
+int main(){
 
 	//freopen("Y_DCT.txt","w",stdout);
 	
@@ -34,6 +25,7 @@ int main(int argc, char **argv){
 	inputImage = cv::imread(inputFile.c_str() , CV_LOAD_IMAGE_COLOR);
 	if (inputImage.empty()){
 		printf("Failed to load Image.\n");
+		system("pause");
 		return 0;
 	}
 
@@ -50,7 +42,7 @@ int main(int argc, char **argv){
 	//Call kernel to calculate DCT values for Y, Cb, Cr channels.
 	FDCTHelper(d_Y, d_Cb, d_Cr, &d_DCTY, &d_DCTCbCr, &h_DCTY, &h_DCTCbCr, numRows(), numCols());
 
-	std::string temp = "inter.txt";
+	std::string temp = "temp.txt";
 	//Open output file
 	FILE *interFile = fopen(temp.c_str(),"wb");
 	if (interFile == NULL){
@@ -61,7 +53,7 @@ int main(int argc, char **argv){
 	compressImage(h_DCTY, h_DCTCbCr, &interFile, numRows(), numCols());
 
 	//packing in 8 bits
-	postProcess(temp.c_str(),outputFile.c_str());
+	postProcess(temp.c_str(),outputFile.c_str(), numRows(), numCols());
 	system("pause");
 	free(h_DCTY);
 	free(h_DCTCbCr);

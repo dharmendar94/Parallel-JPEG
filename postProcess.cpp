@@ -2,22 +2,40 @@
 #include<stdlib.h>
 #include<fstream>
 
-inline void addHeader(FILE** file){
+inline void addHeader(FILE** file, unsigned int numRows, int numCols){
 	FILE* h = fopen("H.bin", "rb");
 	if (h == NULL){
 		printf("h.bin error");
 		exit(-1);
 	}
+
+	unsigned int dim1, dim2;
 	unsigned char c;
-	c = fgetc(h);
-	for (int i = 1; i <= 623; i++){
-		fputc(c, *file);
+	for (int i = 0; i < 623; i++){
+		if (i == 163){
+			dim1 = numRows >> 8;
+			fputc((char)dim1,*file);
+			numRows = numRows & 255;
+			fputc((char)numRows, *file);
+
+			dim1 = numCols >> 8;
+			fputc((char)dim1, *file);
+			numCols = numCols & 255;
+			fputc((char)numCols, *file);
+
+			i += 4;
+			fgetc(h); fgetc(h); fgetc(h); fgetc(h);
+
+		}
+		
 		c = fgetc(h);
+		fputc(c, *file);
+		
 	}
 	fclose(h);
 }
 
-int postProcess(std::string inter, std::string outputFIle)
+int postProcess(std::string inter, std::string outputFIle, unsigned int numRows, unsigned int numCols)
 {
 	FILE *fin = fopen(inter.c_str(),"rb");
 	if (fin == NULL){
@@ -32,7 +50,7 @@ int postProcess(std::string inter, std::string outputFIle)
 		system("pause");
 		exit(-1);
 	}
-	addHeader(&fout);
+	addHeader(&fout, numRows, numCols);
 	unsigned char byte, stuff;
 	unsigned int test = 0;
 	stuff = '0' - 48;
