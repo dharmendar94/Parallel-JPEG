@@ -39,6 +39,8 @@ int main(int argc, char **argv){
 	//Set a pointer to inputImage in host memory
 	h_inputImage = (uchar3*)inputImage.ptr<unsigned int>(0);
 	
+	//StartCounter();
+	
 	//This function allocates memory for input image variable d_inputImage 
 	//on deivce.
 	preProcess(&h_inputImage, &d_inputImage, numRows(), numCols());
@@ -49,6 +51,9 @@ int main(int argc, char **argv){
 	//Call kernel to calculate DCT values for Y, Cb, Cr channels.
 	FDCTHelper(d_Y, d_Cb, d_Cr, &d_DCTY, &d_DCTCbCr, &h_DCTY, &h_DCTCbCr, numRows(), numCols());
 
+	//double t1 = GetCounter();
+	//StartCounter();
+	
 	std::string temp = "temp.txt";
 	//Open output file
 	FILE *interFile = fopen(temp.c_str(),"wb");
@@ -58,6 +63,9 @@ int main(int argc, char **argv){
 	}
 	//Entropy encoding of DCT values.
 	compressImage(h_DCTY, h_DCTCbCr, &interFile, numRows(), numCols());
+	
+	//float t2 = GetCounter();
+	//printf("\nDCT : %f\n Encoding : %f\nTotal : %f",t1,t2,t1+t2);
 
 	//packing in 8 bits
 	postProcess(temp.c_str(),outputFile.c_str(), numRows(), numCols());
